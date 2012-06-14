@@ -58,6 +58,11 @@ public class AdminDatabase implements Database {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public List<BSONObject> update(IoSession session, String collectionName, BSONObject update, BSONObject selector) {
+        throw new UnsupportedOperationException();
+    }
+
     Collection findCollection(String name) {
         Collection collection = collections.get(name);
         if (collection != null) {

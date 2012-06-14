@@ -29,6 +29,7 @@ public class InsertFlatObjectTest extends BaseTest {
         ds.save(person);
         Assert.assertNotNull(person.getId());
         MorphiaQuery<Person> query = createQuery(QPerson.person);
+        Assert.assertEquals(2, query.count());
         Assert.assertEquals(1, query.where(QPerson.person.age.gt(18)).count());
     }
 

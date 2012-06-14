@@ -4,13 +4,15 @@ import com.google.code.morphia.annotations.Entity;
 import com.google.code.morphia.annotations.Id;
 import org.bson.types.ObjectId;
 
+import java.io.Serializable;
+
 /**
  * User: soldier
  * Date: 05.06.12
  * Time: 23:25
  */
-@Entity("person")
-public class Person {
+@Entity
+public class Person implements Serializable {
     @Id
     private ObjectId id;
     private String firstname;

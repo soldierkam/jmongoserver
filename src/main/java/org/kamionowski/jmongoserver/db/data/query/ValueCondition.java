@@ -6,6 +6,8 @@ import org.apache.commons.logging.LogFactory;
 import org.bson.BSONObject;
 import org.bson.BasicBSONObject;
 
+import java.util.Set;
+
 /**
  * User: soldier
  * Date: 28.05.12
@@ -22,7 +24,7 @@ public class ValueCondition extends AbstractCondition {
     public ValueCondition(Condition parent, String fieldName, Object value) {
         super(parent);
         this.fieldName = fieldName;
-        if (value instanceof BSONObject) {
+        if (value instanceof BSONObject && containsInnerCondition((BSONObject) value)) {
             this.value = null;
             this.innerCondition = this.parser.parse(this, (BSONObject) value);
         } else {
@@ -31,15 +33,28 @@ public class ValueCondition extends AbstractCondition {
         }
     }
 
+    private boolean containsInnerCondition(BSONObject object) {
+        Set<String> keys = object.keySet();
+        for (String key : keys) {
+            if (key.startsWith("$")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public boolean filter(Object document) {
-        //TODO: implement inner condition
         if (document instanceof BasicBSONObject) {
             if (innerCondition != null) {
                 return innerCondition.filter(document);
             } else {
-                Object valueInDoc = ((BSONObject) document).get(fieldName);
-                return ObjectUtils.equals(valueInDoc, value);
+                Value valueInDoc = fetchValueInDoc((BSONObject) document);
+                if (valueInDoc.isExists()) {
+                    return ObjectUtils.equals(this.value, valueInDoc.get());
+                } else {
+                    return false;
+                }
             }
         } else {
             return false;
@@ -50,6 +65,24 @@ public class ValueCondition extends AbstractCondition {
     @Override
     public String fieldName() {
         return fieldName;
+    }
+
+    private Value fetchValueInDoc(BSONObject document) {
+        String[] pathElems = fieldName.split("\\.");
+        Value value = new Value(document);
+        for (String elem : pathElems) {
+            Object o = value.get();
+            if (!(o instanceof BSONObject)) {
+                value = Value.NOT_EXISTS;
+            }
+            BSONObject bson = (BSONObject) o;
+            if (bson.containsField(elem)) {
+                value = new Value(bson.get(elem));
+            } else {
+                value = Value.NOT_EXISTS;
+            }
+        }
+        return value;
     }
 
     @Override

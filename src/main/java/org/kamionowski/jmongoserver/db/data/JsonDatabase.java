@@ -10,10 +10,7 @@ import org.kamionowski.jmongoserver.db.system.SystemNamespaceCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * User: soldier
@@ -48,9 +45,14 @@ public class JsonDatabase implements Database {
         log.debug("Query " + this.getName() + "." + collectionName + " for " + query);
         Collection collection = findCollection(collectionName, false);
         if (collection == null) {
-            throw new RuntimeException("Cannot find in db " + this.getName() + " collection named " + collectionName);
+            return new ArrayList<>();
         }
         return collection.query(session, query, selector);
+    }
+
+    @Override
+    public List<BSONObject> update(IoSession session, String collectionName, BSONObject update, BSONObject selector) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

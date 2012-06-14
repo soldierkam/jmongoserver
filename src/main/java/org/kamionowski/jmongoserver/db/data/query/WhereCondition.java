@@ -47,7 +47,11 @@ public class WhereCondition extends AbstractCondition {
             ScriptableObject.putProperty(globalScope, "document", new BsonObjectJs(document));
 
             Scriptable jsObject = cx.newObject(globalScope);
-            Function functionJs = cx.compileFunction(jsObject, function.getCode(), function.toString(), 1, null);
+            String code = function.getCode();
+            if (!code.startsWith("function")) {
+                code = "function(){return " + code + ";}";
+            }
+            Function functionJs = cx.compileFunction(jsObject, code, function.toString(), 1, null);
             ScriptableObject.putProperty(jsObject, "_method", functionJs);
             ScriptableObject.putProperty(globalScope, "_obj", jsObject);
             String callMethodJs = "_obj._method.call(document)";
